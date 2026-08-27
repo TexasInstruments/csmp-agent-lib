@@ -1,6 +1,6 @@
 /******************************************************************************
 
- @file  cc13x2x7_cc26x2x7.cmd
+ @file  cc13x4_cc26x4.cmd
 
  @brief Linker configuration file
 
@@ -9,7 +9,7 @@
 
  ******************************************************************************
  
- Copyright (c) 2016-2025, Texas Instruments Incorporated
+ Copyright (c) 2016-2026, Texas Instruments Incorporated
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -80,22 +80,22 @@
 #define ENTRY_SIZE 0x100
 #define MCUBOOT_RESERVED_TRAILER_SIZE   0x2000
 
-#define PRIMARY_SLOT_BASE 0x0
+#define PRIMARY_SLOT_BASE 0x6000
 #define FLASH_BASE PRIMARY_SLOT_BASE + MCUBOOT_HEAD_SIZE + ENTRY_SIZE
 #define FLASH_SIZE 0xA8000 - MCUBOOT_HEAD_SIZE - ENTRY_SIZE - MCUBOOT_RESERVED_TRAILER_SIZE
 
 #define ENTRY_START (PRIMARY_SLOT_BASE + MCUBOOT_HEAD_SIZE)
 #define ENTRY_END   (ENTRY_START + ENTRY_SIZE - 1)
 #else
-#define FLASH_BASE              0x00000000
-#define FLASH_SIZE              0xAE000
+#define FLASH_BASE				0x00000
+#define FLASH_SIZE				0x100000
 
-#define FLASH_LAST_BASE         0xAE000
-#define FLASH_LAST_SIZE         0x2000
+#define CCFG_BASE               0x50000000
+#define CCFG_SIZE               0x800
 #endif
 
-#define RAM_BASE 0x20000000
-#define RAM_SIZE 0x24000
+#define RAM_BASE                0x20000000
+#define RAM_SIZE                0x40000
 
 /******************************************************************************
  System memory map
@@ -103,14 +103,14 @@
 MEMORY
 {
     /* Application stored in and executes from internal flash */
-    FLASH (RX) : origin = FLASH_BASE, length = FLASH_SIZE
+	FLASH (RX) : origin = FLASH_BASE, length = FLASH_SIZE
 
 #ifdef SBL_ENABLE
     /* MCUBoot requires reset vecs (program entry) be placed at start of image */
     ENTRY (RX) : origin = ENTRY_START, length = ENTRY_SIZE
 #else
-    /* Last page of flash for CCFG */
-    FLASH_LAST (RX) : origin = FLASH_LAST_BASE, length = FLASH_LAST_SIZE
+    /* CCFG section */
+    CCFG (RX) : origin = CCFG_BASE, length = CCFG_SIZE
 #endif
     /* Application uses internal RAM for data */
     SRAM (RWX) : origin = RAM_BASE, length = RAM_SIZE
@@ -126,7 +126,7 @@ SECTIONS
     .text           :   > FLASH
 #else
     .resetVecs      :   > FLASH_BASE
-    .text           :   >> FLASH_LAST | FLASH
+    .text           :   >> FLASH
 #endif
     .const          :   > FLASH
     .constdata      :   > FLASH
@@ -136,21 +136,21 @@ SECTIONS
     .init_array     :   > FLASH
     .emb_text       :   > FLASH
 #ifndef SBL_ENABLE
-    .ccfg           :   > FLASH_LAST (HIGH)
+    .ccfg           :   > CCFG
 #endif
 
 #ifdef FREERTOS
     .ramVecs        :   > RAM_BASE, type=NOINIT
-    .bss            :   >> SRAM
     .data           :   > SRAM
+    .bss            :   > SRAM
     .sysmem         :   > SRAM
     .stack          :   > SRAM (HIGH)
     .nonretenvar    :   > SRAM
 #else
-    .bss            :   >> SRAM
     GROUP > SRAM
     {
         .data
+        .bss
         .ramVecs
         .sysmem
         .nonretenvar
