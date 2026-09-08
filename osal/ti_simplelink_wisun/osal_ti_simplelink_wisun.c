@@ -91,8 +91,8 @@ static int8_t            g_ns_sock = -1;
 static uint8_t           g_rx_buf[CSMP_TI_CH_COUNT][CSMP_TI_RX_BUF_LEN];
 static osal_sockaddr_t   g_rx_src[CSMP_TI_CH_COUNT];
 static int32_t           g_rx_len[CSMP_TI_CH_COUNT];
-/* Track how many times osal_socket() has been called to assign channels */
-static int g_sock_alloc_count = 0;
+/* Per-channel open state.*/
+static bool g_ch_open[CSMP_TI_CH_COUNT] = {false, false};
 
 /* Flash / NV constants are now in osal_platform_types.h */
 
@@ -236,29 +236,73 @@ static void csmp_ns_socket_cb(void *cb_ptr)
     portYIELD_FROM_ISR(w);
 }
 
-/* Open (or return a synthetic handle for) the UDP socket used by CSMP CoAP */
+/* Open (or return a synthetic handle for) the UDP socket used by CSMP CoAP.*/
 osal_socket_handle_t osal_socket(osal_basetype_t d, osal_basetype_t t, osal_basetype_t p)
 {
     (void)d;
     (void)t;
     (void)p;
-    if (g_sock_alloc_count == 0)
+    if (!g_ch_open[CSMP_TI_CH_SERVER])
     {
-        /* First call: coapserver_listen() — open the real nanostack socket. */
-        nanostack_lock();
-        g_ns_sock = socket_open(SOCKET_UDP, 0, csmp_ns_socket_cb);
-        nanostack_unlock();
-        g_sock_alloc_count = 1;
+        if (g_ns_sock < 0)
+        {
+            nanostack_lock();
+            g_ns_sock = socket_open(SOCKET_UDP, 0, csmp_ns_socket_cb);
+            nanostack_unlock();
+        }
+        g_ch_open[CSMP_TI_CH_SERVER] = true;
         DPRINTF("osal_socket: server sock=%d\n", (int)g_ns_sock);
         return (osal_socket_handle_t)g_ns_sock;
     }
     else
     {
-        g_sock_alloc_count++;
+        if (g_ns_sock < 0)
+        {
+            nanostack_lock();
+            g_ns_sock = socket_open(SOCKET_UDP, 0, csmp_ns_socket_cb);
+            nanostack_unlock();
+        }
+        g_ch_open[CSMP_TI_CH_CLIENT] = true;
         DPRINTF("osal_socket: client sock=%d (synthetic)\n",
                 (int)(g_ns_sock + CSMP_TI_CLIENT_FD_OFFSET));
         return (osal_socket_handle_t)(g_ns_sock + CSMP_TI_CLIENT_FD_OFFSET);
     }
+}
+
+/* Close a channel opened by osal_socket(). The synthetic client handle
+ * (g_ns_sock + CSMP_TI_CLIENT_FD_OFFSET) shares the real nanostack socket
+ * with the server channel, so the real socket_close() is only issued once
+ * both channels are closed. Resets g_ns_sock once closed, so the next
+ * osal_socket() call reopens via socket_open() again. */
+osal_basetype_t osal_socket_close(osal_socket_handle_t sockd)
+{
+    int ch = ((int)sockd >= (int)(g_ns_sock + CSMP_TI_CLIENT_FD_OFFSET))
+             ? CSMP_TI_CH_CLIENT : CSMP_TI_CH_SERVER;
+
+    if (!g_ch_open[ch])
+    {
+        return OSAL_FAILURE;
+    }
+
+    g_ch_open[ch] = false;
+
+    if (!g_ch_open[CSMP_TI_CH_SERVER] && !g_ch_open[CSMP_TI_CH_CLIENT])
+    {
+        int8_t r = 0;
+
+        if (g_ns_sock >= 0)
+        {
+            nanostack_lock();
+            r = socket_close(g_ns_sock);
+            nanostack_unlock();
+            DPRINTF("osal_socket_close: closed real sock=%d rv=%d\n", (int)g_ns_sock, (int)r);
+        }
+        g_ns_sock = -1;
+        return (r == 0) ? OSAL_SUCCESS : OSAL_FAILURE;
+    }
+
+    DPRINTF("osal_socket_close: released channel=%d, sock=%d\n", ch, (int)sockd);
+    return OSAL_SUCCESS;
 }
 
 /* Bind the nanostack UDP socket to the CoAP port */

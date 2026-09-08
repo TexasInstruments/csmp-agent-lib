@@ -37,7 +37,7 @@ Cisco FND (management server, receives CoAP registration)
 
 ### Supported boards
 
-The following boards have pre-built CSMP project configurations under `Vendors/TI/`:
+The following boards have pre-built CSMP project configurations under `Vendors/ti/`:
 
 | Board | Architecture | Device family |
 |-------|-------------|---------------|
@@ -47,7 +47,7 @@ The following boards have pre-built CSMP project configurations under `Vendors/T
 | LP-EM-CC1354P10-1 | Cortex-M33 | CC13X4 |
 | LP-EM-CC1354P10-6 | Cortex-M33 | CC13X4 |
 
-A single command builds firmware for all boards at once. Adding a new board requires only creating a `Vendors/TI/<BOARD>/csmp_example_tirf/` directory — the build system discovers it automatically.
+A single command builds firmware for all boards at once. Adding a new board requires only creating a `Vendors/ti/<BOARD>/csmp_example_tirf/` directory — the build system discovers it automatically.
 
 ---
 
@@ -144,7 +144,7 @@ The CSMP Agent firmware needs to know the IPv6 address of your FND server at **c
 
 | File | Used by | What it controls |
 |------|---------|-----------------|
-| `Vendors/TI/application/defines/router.opts` | TI board builds (`CONFIG=SECUREBOOT`) | Passed as `-D` compiler flag, overrides the header at build time |
+| `Vendors/ti/application/defines/router.opts` | TI board builds (`CONFIG=SECUREBOOT`) | Passed as `-D` compiler flag, overrides the header at build time |
 | `sample/CsmpAgentLib_sample.h` | Linux / FreeRTOS builds; also the fallback default | `#define CSMP_AGENT_NMS_ADDRESS` used if the `-D` flag is not present |
 
 Update both files so the address is consistent regardless of which build target is used.
@@ -152,7 +152,7 @@ Update both files so the address is consistent regardless of which build target 
 ### Step A.1 - Update `router.opts` (TI board builds)
 
 ```bash
-nano Vendors/TI/application/defines/router.opts
+nano Vendors/ti/application/defines/router.opts
 ```
 
 Find this line:
@@ -280,7 +280,7 @@ The `CONFIG=SECUREBOOT` flag enables MCUBoot bootloader support, which is requir
 The build does three things in sequence:
 1. Compiles the CSMP Agent library into `csmp_agent_lib_ti_simplelink_wisun.a`
 2. Moves the `.a` file into the `sample/` directory
-3. Loops over every board under `Vendors/TI/*/csmp_example_tirf/freertos/ticlang/`, running SysConfig, compiling the board-specific glue/HAL layer from source, and linking against the SDK's prebuilt Wi-SUN libraries — all five boards are built in one pass
+3. Loops over every board under `Vendors/ti/*/csmp_example_tirf/freertos/ticlang/`, running SysConfig, compiling the board-specific glue/HAL layer from source, and linking against the SDK's prebuilt Wi-SUN libraries — all five boards are built in one pass
 
 ### Step B.4 - Confirm the output
 
@@ -292,38 +292,38 @@ A successful build ends with output similar to:
 Archiving build/debug/csmp_agent_lib_ti_simplelink_wisun.a
 Done.
 ...
---- Building: .../Vendors/TI/LP_CC1312R7/csmp_example_tirf/freertos/ticlang/ ---
+--- Building: .../Vendors/ti/LP_CC1312R7/csmp_example_tirf/freertos/ticlang/ ---
 Generating configuration files... generation complete
 Building application_main.obj ... linking ns_node_csmp.out ... building ns_node_csmp.hex
---- Building: .../Vendors/TI/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/ ---
+--- Building: .../Vendors/ti/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/ ---
 ...
---- Building: .../Vendors/TI/LP_EM_CC1314R10/csmp_example_tirf/freertos/ticlang/ ---
+--- Building: .../Vendors/ti/LP_EM_CC1314R10/csmp_example_tirf/freertos/ticlang/ ---
 ...
---- Building: .../Vendors/TI/LP_EM_CC1354P10_1/csmp_example_tirf/freertos/ticlang/ ---
+--- Building: .../Vendors/ti/LP_EM_CC1354P10_1/csmp_example_tirf/freertos/ticlang/ ---
 ...
---- Building: .../Vendors/TI/LP_EM_CC1354P10_6/csmp_example_tirf/freertos/ticlang/ ---
+--- Building: .../Vendors/ti/LP_EM_CC1354P10_6/csmp_example_tirf/freertos/ticlang/ ---
 ...
 
 All boards built. Output .hex files:
-Vendors/TI/LP_CC1312R7/csmp_example_tirf/freertos/ticlang/ns_node_csmp.hex
-Vendors/TI/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/ns_node_csmp.hex
-Vendors/TI/LP_EM_CC1314R10/csmp_example_tirf/freertos/ticlang/ns_node_csmp.hex
-Vendors/TI/LP_EM_CC1354P10_1/csmp_example_tirf/freertos/ticlang/ns_node_csmp.hex
-Vendors/TI/LP_EM_CC1354P10_6/csmp_example_tirf/freertos/ticlang/ns_node_csmp.hex
+Vendors/ti/LP_CC1312R7/csmp_example_tirf/freertos/ticlang/ns_node_csmp.hex
+Vendors/ti/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/ns_node_csmp.hex
+Vendors/ti/LP_EM_CC1314R10/csmp_example_tirf/freertos/ticlang/ns_node_csmp.hex
+Vendors/ti/LP_EM_CC1354P10_1/csmp_example_tirf/freertos/ticlang/ns_node_csmp.hex
+Vendors/ti/LP_EM_CC1354P10_6/csmp_example_tirf/freertos/ticlang/ns_node_csmp.hex
 ```
 
 The files you will use for your specific board are:
 
 | File | Purpose |
 |------|---------|
-| `Vendors/TI/<BOARD>/csmp_example_tirf/freertos/ticlang/ns_node_csmp.hex` | Full flash image — use with UniFlash for initial flashing |
-| `Vendors/TI/<BOARD>/csmp_example_tirf/freertos/ticlang/ns_node_csmp.bin` | MCUBoot-signed binary — used as input to `add_tpdheader.py` for OTA |
-| `Vendors/TI/<BOARD>/csmp_example_tirf/freertos/ticlang/ns_node_csmp-noheader.bin` | Intermediate file only — do not use directly |
+| `Vendors/ti/<BOARD>/csmp_example_tirf/freertos/ticlang/ns_node_csmp.hex` | Full flash image — use with UniFlash for initial flashing |
+| `Vendors/ti/<BOARD>/csmp_example_tirf/freertos/ticlang/ns_node_csmp.bin` | MCUBoot-signed binary — used as input to `add_tpdheader.py` for OTA |
+| `Vendors/ti/<BOARD>/csmp_example_tirf/freertos/ticlang/ns_node_csmp-noheader.bin` | Intermediate file only — do not use directly |
 
 For example, for LP-CC1352P7-1:
 ```
-Vendors/TI/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/ns_node_csmp.hex   ← flash this initially
-Vendors/TI/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/ns_node_csmp.bin   ← use this for OTA
+Vendors/ti/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/ns_node_csmp.hex   ← flash this initially
+Vendors/ti/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/ns_node_csmp.bin   ← use this for OTA
 ```
 
 ### Step B.5 - Clean the build
@@ -470,7 +470,7 @@ Plug the LaunchPad that will run the CSMP Agent (your chosen board from the supp
 1. Open UniFlash
 2. Click **"Start"** and select your device type
 3. In the **"Program"** tab, browse to the `.hex` file for your board:  
-   `Vendors/TI/<BOARD>/csmp_example_tirf/freertos/ticlang/ns_node_csmp.hex`
+   `Vendors/ti/<BOARD>/csmp_example_tirf/freertos/ticlang/ns_node_csmp.hex`
 4. Click **"Load Image"**
 5. Wait for "Program Load completed successfully"
 
@@ -863,8 +863,8 @@ From the csmp-agent-lib root directory:
 ```
 
 The build produces two files per board. For LP-CC1352P7-1:
-- `Vendors/TI/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/ns_node_csmp.hex` — full flash image for UniFlash
-- `Vendors/TI/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/ns_node_csmp.bin` — MCUBoot-signed binary used for OTA
+- `Vendors/ti/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/ns_node_csmp.hex` — full flash image for UniFlash
+- `Vendors/ti/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/ns_node_csmp.bin` — MCUBoot-signed binary used for OTA
 
 The version embedded in the initial image defaults to `1.0.0` as set in the board makefile's `imgtool` post-build step.
 
@@ -883,7 +883,7 @@ MCUBoot must be flashed to the device before the application. Flash in this orde
 3. **Second — add the CSMP application image:**
    - Click **Add file** and select:
      ```
-     Vendors/TI/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/ns_node_csmp.bin
+     Vendors/ti/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/ns_node_csmp.bin
      ```
 
 4. Click **Load Images** to flash both files to the device.
@@ -901,7 +901,7 @@ The upgrade image must have a **strictly higher version** than the currently run
 Open the makefile for your board. For LP-CC1352P7-1:
 
 ```bash
-nano Vendors/TI/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/SecureBoot.mak
+nano Vendors/ti/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/SecureBoot.mak
 ```
 
 Find the `imgtool sign` line in the `postbuild` section:
@@ -931,7 +931,7 @@ Change `--version 1.0.0` to a version **higher** than what is currently running 
 
 The output `.bin` is now signed with version `2.0.0`:
 ```
-Vendors/TI/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/ns_node_csmp.bin
+Vendors/ti/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/ns_node_csmp.bin
 ```
 
 #### Step H.5 - Update `tpd_config_cc13xx.json` to match the upgrade version
@@ -981,7 +981,7 @@ Run from the csmp-agent-lib root directory:
 
 ```bash
 python3 tools/add_tpdheader.py \
-    Vendors/TI/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/ns_node_csmp.bin \
+    Vendors/ti/LP_CC1352P7_1/csmp_example_tirf/freertos/ticlang/ns_node_csmp.bin \
     ota_upgrade_v2.bin \
     tools/tpd_config_cc13xx.json
 ```
@@ -1072,7 +1072,7 @@ After the device rejoins the Wi-SUN network and re-registers with FND (allow 60�
 
 | Step | Action | Where |
 |------|--------|-------|
-| H.3 | Update `--version` in imgtool command | `Vendors/TI/<BOARD>/.../SecureBoot.mak` |
+| H.3 | Update `--version` in imgtool command | `Vendors/ti/<BOARD>/.../SecureBoot.mak` |
 | H.4 | Build | `./build.sh ti_simplelink_wisun CONFIG=SECUREBOOT` |
 | H.5 | Update `tpd_config_cc13xx.json` version fields | `tools/tpd_config_cc13xx.json` — match major/minor/build/name to H.3 version |
 | H.6 | Wrap with TPD header | `python3 tools/add_tpdheader.py <in.bin> <out.bin> tools/tpd_config_cc13xx.json` |

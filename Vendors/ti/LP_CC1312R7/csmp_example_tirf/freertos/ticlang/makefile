@@ -48,7 +48,7 @@ CFLAGS += -I../.. \
     -DxFIXED_GTK_KEYS \
     -DWISUN_RCP_ENABLE \
     "-I$(SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR)/source/ti/ti_wisunfan/mbed_port/ti-rf-driver/ti-rf-driver" \
-    -I$(CSMP_AGENT_LIB_INSTALL_DIR)/Vendors/TI/application \
+    -I$(CSMP_AGENT_LIB_INSTALL_DIR)/Vendors/ti/application \
     "-I$(SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR)/source/ti/ti_wisunfan/apps/common/include" \
     "-I$(SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR)/source/ti/common/nv" \
     "-I$(SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR)/source/ti/ti_wisunfan/mbed_config/ws_router" \
@@ -66,7 +66,7 @@ CFLAGS += -I../.. \
     "-I$(CSMP_AGENT_LIB_INSTALL_DIR)/osal/ti_simplelink_wisun" \
     "-I$(CSMP_AGENT_LIB_INSTALL_DIR)/sample" \
     -include mbed_config.h \
-    @$(CSMP_AGENT_LIB_INSTALL_DIR)/Vendors/TI/application/defines/router.opts \
+    @$(CSMP_AGENT_LIB_INSTALL_DIR)/Vendors/ti/application/defines/router.opts \
     "-I$(SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR)/source/ti/posix/ticlang" \
     "-I$(SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR)/source/ti/ti_wisunfan/mbed_port/ti-rf-driver/source" \
     "-I$(SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR)/source/ti/ti_wisunfan/mbed_port/mbednanostack2tirtos" \
@@ -207,7 +207,7 @@ CPPFLAGS += -I../.. \
     -DxFIXED_GTK_KEYS \
     -DWISUN_RCP_ENABLE \
     "-I$(SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR)/source/ti/ti_wisunfan/mbed_port/ti-rf-driver/ti-rf-driver" \
-    -I$(CSMP_AGENT_LIB_INSTALL_DIR)/Vendors/TI/application \
+    -I$(CSMP_AGENT_LIB_INSTALL_DIR)/Vendors/ti/application \
     "-I$(SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR)/source/ti/ti_wisunfan/apps/common/include" \
     "-I$(SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR)/source/ti/common/nv" \
     "-I$(SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR)/source/ti/ti_wisunfan/mbed_config/ws_router" \
@@ -225,7 +225,7 @@ CPPFLAGS += -I../.. \
     "-I$(CSMP_AGENT_LIB_INSTALL_DIR)/osal/ti_simplelink_wisun" \
     "-I$(CSMP_AGENT_LIB_INSTALL_DIR)/sample" \
     -include mbed_config.h \
-    @$(CSMP_AGENT_LIB_INSTALL_DIR)/Vendors/TI/application/defines/router.opts \
+    @$(CSMP_AGENT_LIB_INSTALL_DIR)/Vendors/ti/application/defines/router.opts \
     "-I$(SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR)/source/ti/posix/ticlang" \
     "-I$(SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR)/source/ti/ti_wisunfan/mbed_port/ti-rf-driver/source" \
     "-I$(SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR)/source/ti/ti_wisunfan/mbed_port/mbednanostack2tirtos" \
@@ -394,14 +394,14 @@ endef
 
 $(foreach c_file,$(SYSCFG_C_FILES),$(eval $(call C_RULE,$(c_file))))
 
-application_main.obj: $(CSMP_AGENT_LIB_INSTALL_DIR)/Vendors/TI/application/main.c $(SYSCFG_H_FILES)
+application_main.obj: $(CSMP_AGENT_LIB_INSTALL_DIR)/Vendors/ti/application/main.c $(SYSCFG_H_FILES)
 	@ echo Building $@
 	@ $(CC) $(CFLAGS) -c $< -o $@
 
-application_application.obj: $(CSMP_AGENT_LIB_INSTALL_DIR)/Vendors/TI/application/application.c $(SYSCFG_H_FILES)
+application_application.obj: $(CSMP_AGENT_LIB_INSTALL_DIR)/Vendors/ti/application/application.c $(SYSCFG_H_FILES)
 	@ echo Building $@
 	@ $(CC) $(CFLAGS) -c $< -o $@
-application_sntp_sync.obj: $(CSMP_AGENT_LIB_INSTALL_DIR)/Vendors/TI/application/sntp_sync.c $(SYSCFG_H_FILES)
+application_sntp_sync.obj: $(CSMP_AGENT_LIB_INSTALL_DIR)/Vendors/ti/application/sntp_sync.c $(SYSCFG_H_FILES)
 	@ echo Building $@
 	@ $(CC) $(CFLAGS) -c $< -o $@
 

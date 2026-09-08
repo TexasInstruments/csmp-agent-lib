@@ -1,7 +1,7 @@
 ####################################################################
 # TI Wi-SUN FAN — board example build target                       #
 #                                                                   #
-# Loops over all boards in Vendors/TI/ and builds each board's     #
+# Loops over all boards in Vendors/ti/ and builds each board's     #
 # csmp_example_tirf firmware using the pre-built library.           #
 #                                                                   #
 # SETUP (two steps before running build.sh):                        #
@@ -59,14 +59,14 @@ CONFIG ?= RELEASE
 # -----------------------------------------------------------------------
 # Board discovery — no changes needed below this line
 # -----------------------------------------------------------------------
-BOARD_DIRS := $(wildcard $(TOPDIR)/Vendors/TI/*/csmp_example_tirf/freertos/ticlang/)
+BOARD_DIRS := $(wildcard $(TOPDIR)/Vendors/ti/*/csmp_example_tirf/freertos/ticlang/)
 
 all: ti_simplelink_wisun
 
 ti_simplelink_wisun:
 ifeq ($(strip $(BOARD_DIRS)),)
 	@echo ""
-	@echo "TI Wi-SUN FAN — no boards found in Vendors/TI/"
+	@echo "TI Wi-SUN FAN — no boards found in Vendors/ti/"
 	@echo ""
 	@echo "Library csmp_agent_lib_ti_simplelink_wisun.a was built successfully."
 else
