@@ -333,16 +333,33 @@ osal_ssize_t osal_sendto(osal_socket_handle_t sockd, const void *buf, size_t len
     return (osal_ssize_t)r;
 }
 
-/* Scatter-gather send: forwards the first iov buffer via osal_sendto */
+/* Scatter-gather send: flattens all iov buffers into one contiguous buffer,
+ * since the underlying nanostack socket_sendto() takes a single buffer. */
 osal_ssize_t osal_sendmsg(osal_socket_handle_t sockd, const struct msghdr msg,
                           osal_basetype_t flags)
 {
+    static uint8_t s_sendmsg_buf[CSMP_TI_RX_BUF_LEN];
+    size_t total = 0;
+
     if (!msg.msg_name || msg.msg_iovlen == 0)
     {
         return -1;
     }
-    return osal_sendto(sockd, msg.msg_iov[0].iov_base, msg.msg_iov[0].iov_len,
-                       flags, (const osal_sockaddr_t *)msg.msg_name,
+
+    for (size_t i = 0; i < (size_t)msg.msg_iovlen; i++)
+    {
+        size_t iovLen = msg.msg_iov[i].iov_len;
+
+        if ((total + iovLen) > sizeof(s_sendmsg_buf))
+        {
+            return -1;
+        }
+        memcpy(&s_sendmsg_buf[total], msg.msg_iov[i].iov_base, iovLen);
+        total += iovLen;
+    }
+
+    return osal_sendto(sockd, s_sendmsg_buf, total, flags,
+                       (const osal_sockaddr_t *)msg.msg_name,
                        (osal_socklen_t)msg.msg_namelen);
 }
 
@@ -649,13 +666,26 @@ osal_basetype_t osal_write_firmware(uint8_t slotid, uint8_t *data, uint32_t size
     return (r == NVS_STATUS_SUCCESS) ? OSAL_SUCCESS : OSAL_FAILURE;
 }
 
-/* No-op: MCUBoot handles firmware rollback natively; SetBackupRequest (TLV 70) is accepted but ignored */
+/* BACKUP_IMAGE has no physical storage backing on this platform — only
+ * RUN_IMAGE (internal flash) and UPLOAD_IMAGE (external SPI flash) are
+ * wired to real storage in osal_read_firmware()/osal_write_firmware().
+ * Reject any copy into or out of BACKUP_IMAGE so callers see failure
+ * rather than a falsely "complete" backup slot that a later LoadRequest
+ * could activate against unwritten flash. */
 osal_basetype_t osal_copy_firmware(uint8_t src_slotid, uint8_t dst_slotid,
                                    Csmp_Slothdr *slots)
 {
-    (void)src_slotid; (void)dst_slotid; (void)slots;
-    DPRINTF("osal_copy_firmware: no-op — MCUBoot handles rollback natively\n");
-    return OSAL_SUCCESS;
+    (void)slots;
+
+    if ((src_slotid == BACKUP_IMAGE) || (dst_slotid == BACKUP_IMAGE))
+    {
+        DPRINTF("osal_copy_firmware: BACKUP_IMAGE not supported on this platform\n");
+        return OSAL_FAILURE;
+    }
+
+    DPRINTF("osal_copy_firmware: unsupported slot copy %u -> %u\n",
+             (unsigned)src_slotid, (unsigned)dst_slotid);
+    return OSAL_FAILURE;
 }
 
 /* Internal trickle helpers — identical to osal_freertos.c */
